@@ -5,18 +5,16 @@ public class MainMCP3008Sample {
 	
 	private final static boolean DEBUG = false;
 	  private static boolean go = true;
-	  private static int ADC_CHANNEL =
-			  MCP3008Reader.MCP3008_input_channels.CH0.ch();
+	  private static int ADC_CHANNEL = MCP3008Reader.MCP3008_input_channels.CH0.ch();
 	
-	public MainMCP3008Sample() {
-		// TODO Auto-generated constructor stub
-		
-	}
-
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		   MCP3008Reader.initMCP3008();
-		    
+		
+		
+		  	System.out.println("1");
+		    MCP3008Reader.initMCP3008();
+		    System.out.println("2");
 		    Runtime.getRuntime().addShutdownHook(new Thread()
 		                                         {
 		                                           public void run()
@@ -31,15 +29,21 @@ public class MainMCP3008Sample {
 		                                         });
 		    int lastRead  = 0;
 		    int tolerance = 5;
+		    System.out.println("3");
 		    while (go)
 		    {
 		      boolean trimPotChanged = false;
+		      System.out.println("3");
 		      int adc = MCP3008Reader.readMCP3008(ADC_CHANNEL);
+		      System.out.println("4");
+		      System.out.println("adc :" + adc);
+		      
 		      int postAdjust = Math.abs(adc - lastRead);
 		      if (postAdjust > tolerance)
 		      {
 		        trimPotChanged = true;
 		        int volume = (int)(adc / 10.23); // [0, 1023] ~ [0x0000, 0x03FF] ~ [0&0, 0&1111111111]
+		        		        
 		        if (DEBUG)
 		          System.out.println("readAdc:" + Integer.toString(adc) + 
 		                                          " (0x" + lpad(Integer.toString(adc, 16).toUpperCase(), "0", 2) + 

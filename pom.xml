@@ -2,8 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>fr.jull.gpio.mcp3008</groupId>
   <artifactId>myMcp3008</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>war</packaging>
+  <version>0.0.1</version>
+  <packaging>jar</packaging>
   <name>My Mcp3008</name>
   <description>Utilisation du Mcp3008</description>
   
@@ -28,6 +28,35 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
+      
+      <plugin>
+		<groupId>org.apache.tomcat.maven</groupId>
+		<artifactId>tomcat7-maven-plugin</artifactId>
+		<version>2.2</version>
+		<configuration>
+			<url>http://192.168.1.18:8080/manager/text</url>
+			<path>/gpiobruit</path>
+			</configuration>
+	  </plugin>
+      
+      			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<archive>
+						<manifest>
+<!-- 							<addClasspath>true</addClasspath> -->
+<!-- 							<classpathPrefix>lib/</classpathPrefix> -->
+							<mainClass>fr.jull.gpio.mcp3008.myMcp3008.MainMCP3008Sample</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+      
     </plugins>
   </build>
   

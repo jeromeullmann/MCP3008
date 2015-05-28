@@ -16,14 +16,12 @@ public class MCP3008Reader {
 
 	
 	 private final static boolean DISPLAY_DIGIT = "true".equals(System.getProperty("display.digit", "false"));
-	  // Note: "Mismatch" 23-24. The wiring says DOUT->#23, DIN->#24
-	  // 23: DOUT on the ADC is IN on the GPIO. ADC:Slave, GPIO:Master
-	  // 24: DIN on the ADC, OUT on the GPIO. Same reason as above.
-	  // SPI: Serial Peripheral Interface
-	  private static Pin spiClk  = RaspiPin.GPIO_01; // Pin #18, clock
-	  private static Pin spiMiso = RaspiPin.GPIO_04; // Pin #23, data in.  MISO: Master In Slave Out
-	  private static Pin spiMosi = RaspiPin.GPIO_05; // Pin #24, data out. MOSI: Master Out Slave In
-	  private static Pin spiCs   = RaspiPin.GPIO_06; // Pin #25, Chip Select
+	
+	 
+	  private static Pin spiClk  = RaspiPin.GPIO_17; // Pin #18, clock
+	  private static Pin spiMiso = RaspiPin.GPIO_23; // Pin #23, data in.  MISO: Master In Slave Out
+	  private static Pin spiMosi = RaspiPin.GPIO_24; // Pin #24, data out. MOSI: Master Out Slave In
+	  private static Pin spiCs   = RaspiPin.GPIO_25; // Pin #25, Chip Select
 	 
 	  public enum MCP3008_input_channels
 	  {
@@ -70,6 +68,9 @@ public class MCP3008Reader {
 	  
 	  public static int readMCP3008(int channel)
 	  {
+		  
+		System.out.println("1.1");
+		
 	    chipSelectOutput.high();
 	    
 	    clockOutput.low();
@@ -80,14 +81,22 @@ public class MCP3008Reader {
 	      System.out.println("1 -       ADCCOMMAND: 0x" + lpad(Integer.toString(adccommand, 16).toUpperCase(), "0",  4) + 
 	                                       ", 0&" + lpad(Integer.toString(adccommand,  2).toUpperCase(), "0", 16));
 	    adccommand |= 0x18; // 0x18: 00011000
+	    System.out.println("1.2");
+	    
 	    if (DISPLAY_DIGIT)
 	      System.out.println("2 -       ADCCOMMAND: 0x" + lpad(Integer.toString(adccommand, 16).toUpperCase(), "0",  4) + 
 	                                       ", 0&" + lpad(Integer.toString(adccommand,  2).toUpperCase(), "0", 16));
 	    adccommand <<= 3;
+	    
+	    System.out.println("1.3");
+	    
 	    if (DISPLAY_DIGIT)
 	      System.out.println("3 -       ADCCOMMAND: 0x" + lpad(Integer.toString(adccommand, 16).toUpperCase(), "0",  4) + 
 	                                       ", 0&" + lpad(Integer.toString(adccommand,  2).toUpperCase(), "0", 16));
 	    // Send 5 bits: 8 - 3. 8 input channels on the MCP3008.
+	    
+	    System.out.println("1.4");
+	    
 	    for (int i=0; i<5; i++) //
 	    {
 	      if (DISPLAY_DIGIT)
@@ -103,6 +112,9 @@ public class MCP3008Reader {
 	    }
 
 	    int adcOut = 0;
+	    
+	    System.out.println("1.5");
+	    
 	    for (int i=0; i<12; i++) // Read in one empty bit, one null bit and 10 ADC bits
 	    {
 	      tickOnPin(clockOutput);      
