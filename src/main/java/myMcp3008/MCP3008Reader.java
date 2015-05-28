@@ -133,6 +133,9 @@ public class MCP3008Reader {
 	    chipSelectOutput.high();
 
 	    adcOut >>= 1; // Drop first bit
+	      
+		System.out.println("1.6");  
+	    System.out.println("La mesure :" + adcOut);  
 	    return adcOut;
 	  }
 	  

@@ -33,9 +33,9 @@ public class MainMCP3008Sample {
 		    while (go)
 		    {
 		      boolean trimPotChanged = false;
-		      System.out.println("3");
-		      int adc = MCP3008Reader.readMCP3008(ADC_CHANNEL);
 		      System.out.println("4");
+		      int adc = MCP3008Reader.readMCP3008(ADC_CHANNEL);
+		      System.out.println("5");
 		      System.out.println("adc :" + adc);
 		      
 		      int postAdjust = Math.abs(adc - lastRead);
@@ -60,6 +60,7 @@ public class MainMCP3008Sample {
 		      } catch (InterruptedException ie) { ie.printStackTrace(); }
 		    }
 		    System.out.println("Bye, freeing resources.");
+		    System.out.println("6");
 		    MCP3008Reader.shutdownMCP3008();
 	}
 	
