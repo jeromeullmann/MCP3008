@@ -1,5 +1,8 @@
 package myMcp3008;
 
+// http://www.lediouris.net/RaspberryPI/ADC/readme.html
+// https://01509530127781966272.googlegroups.com/attach/a0451b42792b386/GPIO%20output.jpg?part=0.1&view=1&vt=ANaJVrFHhuxhOMV3XZYV9QBBEcyP_pOodXXRQR2RtPUhVUX_IF8LUsx0RDjEJVAyliGHZ2pTRScvZ7VEAf-NOIkKI_asPxon29luChuSdM2HbQOVlfMnZv0
+
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
@@ -13,15 +16,27 @@ public class MCP3008Reader {
 	public MCP3008Reader() {
 		// TODO Auto-generated constructor stub
 	}
-
-	
-	 private final static boolean DISPLAY_DIGIT = "true".equals(System.getProperty("display.digit", "false"));
-	
 	 
-	  private static Pin spiClk  = RaspiPin.GPIO_17; // Pin #18, clock
-	  private static Pin spiMiso = RaspiPin.GPIO_23; // Pin #23, data in.  MISO: Master In Slave Out
-	  private static Pin spiMosi = RaspiPin.GPIO_24; // Pin #24, data out. MOSI: Master Out Slave In
-	  private static Pin spiCs   = RaspiPin.GPIO_25; // Pin #25, Chip Select
+	 		// SPICLK = 17 GPIO17
+			// SPIMISO = 23 GPIO23
+			// SPIMOSI = 24 GPIO24
+			// SPICS = 25 GPIO25
+	 
+	  private static Pin spiClk  = RaspiPin.GPIO_00; // SPICLK : CLK
+	  // CLK = GPIO17 = GPIO_GEN0 
+	  
+      // SPICLK = 17 GPIO17
+	  
+	  private static Pin spiMiso = RaspiPin.GPIO_04; // MISO : DIN
+      // Din = GPIO23 = GPIO_GEN4
+	  
+	  
+	  private static Pin spiMosi = RaspiPin.GPIO_05; // MOSI : DOUT
+      // Dout = GPIO24 = GPIO_GEN5 
+
+	  
+	  private static Pin spiCs  = RaspiPin.GPIO_06; // CS : CS
+	  // Cs = Chip Select = GPIO25 =  GPIO_GEN6
 	 
 	  public enum MCP3008_input_channels
 	  {
@@ -44,21 +59,28 @@ public class MCP3008Reader {
 	    public int ch() { return this.ch; }
 	  }
 	  
-	  private static GpioController gpio;
 	  
+	  private static GpioController gpio;
 	  private static GpioPinDigitalInput  misoInput        = null;
 	  private static GpioPinDigitalOutput mosiOutput       = null;
 	  private static GpioPinDigitalOutput clockOutput      = null;
 	  private static GpioPinDigitalOutput chipSelectOutput = null;
 	  
+	  
 	  public static void initMCP3008()
 	  {
 	    gpio = GpioFactory.getInstance();
-	    mosiOutput       = gpio.provisionDigitalOutputPin(spiMosi, "MOSI", PinState.LOW);
-	    clockOutput      = gpio.provisionDigitalOutputPin(spiClk,  "CLK",  PinState.LOW);
-	    chipSelectOutput = gpio.provisionDigitalOutputPin(spiCs,   "CS",   PinState.LOW);
+    
+	    // definition de l'interface SPI
+	    // GPIO.setup(SPIMOSI, GPIO.OUT)
+	    // GPIO.setup(SPIMISO, GPIO.IN)
+	    // GPIO.setup(SPICLK, GPIO.OUT)
+	    // GPIO.setup(SPICS, GPIO.OUT)
 	    
+	    mosiOutput       = gpio.provisionDigitalOutputPin(spiMosi, "MOSI", PinState.LOW); // GPIO.output(mosipin, Low)
 	    misoInput        = gpio.provisionDigitalInputPin(spiMiso, "MISO");    
+	    clockOutput      = gpio.provisionDigitalOutputPin(spiClk,  "CLK",  PinState.LOW); // GPIO.output(clockpin, False)
+	    chipSelectOutput = gpio.provisionDigitalOutputPin(spiCs,   "CS",   PinState.LOW); //  GPIO.output(cspin, False)
 	  }
 	  
 	  public static void shutdownMCP3008()
@@ -69,88 +91,40 @@ public class MCP3008Reader {
 	  public static int readMCP3008(int channel)
 	  {
 		  
-		System.out.println("1.1");
-		
-	    chipSelectOutput.high();
+	    chipSelectOutput.high(); 	//  GPIO.output(cspin, True)
 	    
-	    clockOutput.low();
-	    chipSelectOutput.low();
+	    clockOutput.low(); 			// GPIO.output(clockpin, False)
+	    chipSelectOutput.low();		//  GPIO.output(cspin, False)
 	  
 	    int adccommand = channel;
-	    if (DISPLAY_DIGIT)
-	      System.out.println("1 -       ADCCOMMAND: 0x" + lpad(Integer.toString(adccommand, 16).toUpperCase(), "0",  4) + 
-	                                       ", 0&" + lpad(Integer.toString(adccommand,  2).toUpperCase(), "0", 16));
+	    
 	    adccommand |= 0x18; // 0x18: 00011000
-	    System.out.println("1.2");
-	    
-	    if (DISPLAY_DIGIT)
-	      System.out.println("2 -       ADCCOMMAND: 0x" + lpad(Integer.toString(adccommand, 16).toUpperCase(), "0",  4) + 
-	                                       ", 0&" + lpad(Integer.toString(adccommand,  2).toUpperCase(), "0", 16));
 	    adccommand <<= 3;
-	    
-	    System.out.println("1.3");
-	    
-	    if (DISPLAY_DIGIT)
-	      System.out.println("3 -       ADCCOMMAND: 0x" + lpad(Integer.toString(adccommand, 16).toUpperCase(), "0",  4) + 
-	                                       ", 0&" + lpad(Integer.toString(adccommand,  2).toUpperCase(), "0", 16));
-	    // Send 5 bits: 8 - 3. 8 input channels on the MCP3008.
-	    
-	    System.out.println("1.4");
-	    
-	    for (int i=0; i<5; i++) //
+	    for (int i=0; i<5; i++) 
 	    {
-	      if (DISPLAY_DIGIT)
-	        System.out.println("4 - (i=" + i + ") ADCCOMMAND: 0x" + lpad(Integer.toString(adccommand, 16).toUpperCase(), "0",  4) + 
-	                                                       ", 0&" + lpad(Integer.toString(adccommand,  2).toUpperCase(), "0", 16));
 	      if ((adccommand & 0x80) != 0x0) // 0x80 = 0&10000000
-	        mosiOutput.high();
+	        mosiOutput.high(); // GPIO.output(mosipin, True)
 	      else
-	        mosiOutput.low();
+	        mosiOutput.low(); // GPIO.output(mosipin, False)
 	      adccommand <<= 1;      
-	      // Clock high and low
-	      tickOnPin(clockOutput);      
+	      clockOutput.high(); // GPIO.output(clockpin, True)
+	      clockOutput.low();  // GPIO.output(clockpin, False)
 	    }
-
 	    int adcOut = 0;
-	    
-	    System.out.println("1.5");
-	    
 	    for (int i=0; i<12; i++) // Read in one empty bit, one null bit and 10 ADC bits
 	    {
-	      tickOnPin(clockOutput);      
+		  clockOutput.high(); // GPIO.output(clockpin, True)
+		  clockOutput.low();  // GPIO.output(clockpin, False)
 	      adcOut <<= 1;
-
-	      if (misoInput.isHigh())
+	      if (misoInput.isHigh()) //  GPIO.input(misopin)
 	      {
-//	      System.out.println("    " + misoInput.getName() + " is high (i:" + i + ")");
 	        // Shift one bit on the adcOut
 	        adcOut |= 0x1;
 	      }
-	      if (DISPLAY_DIGIT)
-	        System.out.println("ADCOUT: 0x" + lpad(Integer.toString(adcOut, 16).toUpperCase(), "0",  4) + 
-	                                 ", 0&" + lpad(Integer.toString(adcOut,  2).toUpperCase(), "0", 16));
 	    }
-	    chipSelectOutput.high();
-
+	    chipSelectOutput.high(); //  GPIO.output(cspin, True)
 	    adcOut >>= 1; // Drop first bit
-	      
-		System.out.println("1.6");  
-	    System.out.println("La mesure :" + adcOut);  
 	    return adcOut;
-	  }
-	  
-	  private static void tickOnPin(GpioPinDigitalOutput pin)
-	  {
-	    pin.high();
-	    pin.low();
-	  }
-	  
-	  private static String lpad(String str, String with, int len)
-	  {
-	    String s = str;
-	    while (s.length() < len)
-	      s = with + s;
-	    return s;
 	  }
 	
 }
